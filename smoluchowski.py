@@ -60,6 +60,7 @@ def main():
   x = np.linspace(0.001,100,Nx);
   Nt = 30
   f0 = np.exp(-x)
+  #f0 = x**-2
   K_A = '1'
   f = smolsolve(x, f0, t, K_A, Nt)
   fig = plt.plot(x, f, 'o', color=[0., 1., 0.])
@@ -86,13 +87,13 @@ def smolsolve(x, f0, t, K_A, Nt):
   g = x * f0
   for t in xrange(Nt):
     JL = 0*x;
-    for i in xrange(1,Nx-1):
+    for i in xrange(1,Nx):
         for p in xrange(0,i):
             # K_A = 1
             # this is analytic expression for int_{x_j}^{x_j+1} K_A(x_mid(i),y)/y \, dy
-            kernBndry = np.log(x[i-p+1]/xMid[i-p])
+            kernBndry = np.log(x[i-p]/xMid[i-p-1])
             kern = np.log(x[i-p+1:-1]/x[i-p:-2])
-            JL[i] = JL[i] + dx*g[p] * (kernBndry*g[i-p] + np.sum(kern*g[i-p:-2]));
+            JL[i] = JL[i] + dx*g[p] * (kernBndry*g[i-p-1] + np.sum(kern*g[i-p:-2]));
     
     JR = np.roll(JL,-1);
     JR[-1]= 0;
