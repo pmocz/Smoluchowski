@@ -56,7 +56,7 @@ def main():
 
   # compare with the numerical solutions
   t = 3.
-  Nx = 200
+  Nx = 100
   x = np.linspace(0.001,100,Nx);
   Nt = 30
   f0 = np.exp(-x)
@@ -85,10 +85,10 @@ def smolsolve(x, f0, t, K_A, Nt):
   xMid = np.linspace(x[0]+0.5*dx,x[-1]-0.5*dx,Nx-1);
   dt = t / Nt
   g = x * f0
-  for t in xrange(Nt):
+  for t in range(Nt):
     JL = 0*x;
-    for i in xrange(1,Nx):
-        for p in xrange(0,i):
+    for i in range(1,Nx-1):
+        for p in range(0,i):
             # K_A = 1
             # this is analytic expression for int_{x_j}^{x_j+1} K_A(x_mid(i),y)/y \, dy
             kernBndry = np.log(x[i-p]/xMid[i-p-1])
