@@ -28,8 +28,7 @@ def main():
   """
   
   # Example 1. K = 1
-  Nx = 1000
-  x = np.linspace(0.001,100,Nx);
+  x = np.linspace(0.001,100,1000);
   cc = 0;
   for t in np.array([0,0.5,1,3]):
     cc+=1
@@ -56,49 +55,50 @@ def main():
 
   # compare with the numerical solutions
   t = 3.
-  Nx = 100
-  x = np.linspace(0.001,100,Nx);
   Nt = 30
+  Nx = 100
+  xBound = np.linspace(0.01,100,Nx);
+  dx = xBound[1] - xBound[0]
+  x = np.linspace(xBound[0]+0.5*dx,xBound[-1]-0.5*dx,Nx-1);
   f0 = np.exp(-x)
   #f0 = x**-2
   K_A = '1'
-  f = smolsolve(x, f0, t, K_A, Nt)
+  f = smolsolve(x, xBound, f0, t, K_A, Nt)
   fig = plt.plot(x, f, 'o', color=[0., 1., 0.])
 
   plt.legend(loc='lower left')
   plt.xlabel('$x$')
   plt.ylabel('$f(t,x)$')
-  plt.axis([0, 12, 1e-6, 1e1])
+  plt.axis([0.001, 12, 1e-6, 1e1])
   plt.savefig('solution.pdf', aspect = 'normal', bbox_inches='tight', pad_inches = 0)
   plt.close()
    
    
    
    
-def smolsolve(x, f0, t, K_A, Nt):
+def smolsolve(x, xBound, f0, t, K_A, Nt):
   """ solve Smoluchowski equations
   Input: x, initial condition, time, kernel, # timestep
   Output: solution f(t,x)
   """
-  dx = x[1] - x[0]
+  dx = xBound[1] - xBound[0]
   Nx = x.size
-  xMid = np.linspace(x[0]+0.5*dx,x[-1]-0.5*dx,Nx-1);
   dt = t / Nt
   g = x * f0
   for t in range(Nt):
     JL = 0*x;
-    for i in range(1,Nx-1):
+    for i in range(1,Nx):
         for p in range(0,i):
             # K_A = 1
             # this is analytic expression for int_{x_j}^{x_j+1} K_A(x_mid(i),y)/y \, dy
-            kernBndry = np.log(x[i-p]/xMid[i-p-1])
-            kern = np.log(x[i-p+1:-1]/x[i-p:-2])
-            JL[i] = JL[i] + dx*g[p] * (kernBndry*g[i-p-1] + np.sum(kern*g[i-p:-2]));
+            kernBndry = np.log(xBound[i-p]/x[i-p-1])
+            kern = np.log(xBound[i-p+1:-1]/xBound[i-p:-2])
+            JL[i] = JL[i] + dx*g[p] * (kernBndry*g[i-p-1] + np.sum(kern*g[i-p:-1]));
     
     JR = np.roll(JL,-1);
     JR[-1]= 0;
     g = g - dt / dx * ( JR - JL );
-  
+
   f = g / x
   return f
      
