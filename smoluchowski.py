@@ -41,9 +41,9 @@ def main():
   t = 3.
   Nt = 30
   Nx = 100
-  xBound = np.linspace(0.01,100,Nx);
+  xBound = np.linspace(0.01,100,Nx)
   dx = xBound[1] - xBound[0]
-  x = np.linspace(xBound[0]+0.5*dx,xBound[-1]-0.5*dx,Nx-1);
+  x = np.linspace(xBound[0]+0.5*dx,xBound[-1]-0.5*dx,Nx-1)
   f0 = np.exp(-x)
   #f0 = x**-2
   K_A = '1'
@@ -60,8 +60,8 @@ def main():
 
 
   # [Example 2.] K = x*y
-  x = np.linspace(0.001,100,1000);
-  cc = 0;
+  x = np.linspace(0.001,100,1000)
+  cc = 0
   for t in np.array([0,0.5,1,3]):
     cc+=1
     T = 1+t
@@ -72,16 +72,16 @@ def main():
     else:
 	  f = np.exp(-x)/x
     g = x*f
-    fig = plt.plot(x, f, linewidth=1, color=[cc/5., 0., 0.], label='$t='+"%0.1f" % t +'$')
+    fig = plt.plot(x, f, linewidth=2, color=[cc/5., 0., 0.], label='$t='+"%0.1f" % t +'$')
   plt.yscale('log')
    
   # compare with the numerical solutions
   t = 3.
   Nt = 30
   Nx = 100
-  xBound = np.linspace(0.01,100,Nx);
+  xBound = np.linspace(0.01,100,Nx)
   dx = xBound[1] - xBound[0]
-  x = np.linspace(xBound[0]+0.5*dx,xBound[-1]-0.5*dx,Nx-1);
+  x = np.linspace(xBound[0]+0.5*dx,xBound[-1]-0.5*dx,Nx-1)
   f0 = np.exp(-x)/x
   K_A = 'x*y'
   f = smolsolve(x, xBound, f0, t, K_A, Nt)
@@ -96,6 +96,28 @@ def main():
    
    
    
+  # [Example 3.] K = (x*y)^(15/14)*(x+y)^(9/14)    my own example
+
+  # numerical solution only
+  t = 3.
+  Nt = 30
+  Nx = 100
+  xBound = np.linspace(0.01,100,Nx)
+  dx = xBound[1] - xBound[0]
+  x = np.linspace(xBound[0]+0.5*dx,xBound[-1]-0.5*dx,Nx-1)
+  f0 = np.exp(-x)
+  K_A = '(x*y)^(15/14)*(x+y)^(9/14)'
+  f = smolsolve(x, xBound, f0, t, K_A, Nt)
+  fig = plt.plot(x, f0, linewidth=2, color=[0., 0., 1.])
+  fig = plt.plot(x, f, 'o', color=[0., 1., 0.])
+  plt.yscale('log')
+
+  plt.xlabel('$x$')
+  plt.ylabel('$f(t,x)$')
+  plt.axis([0.001, 12, 1e-6, 1e1])
+  plt.savefig('solution3.pdf', aspect = 'normal', bbox_inches='tight', pad_inches = 0)
+  plt.close()  
+   
    
 def smolsolve(x, xBound, f0, t, K_A, Nt):
   """ solve Smoluchowski equations
@@ -107,7 +129,7 @@ def smolsolve(x, xBound, f0, t, K_A, Nt):
   dt = t / Nt
   g = x * f0
   for t in range(Nt):
-    JL = 0*x;
+    JL = 0*x
     for i in range(1,Nx):
         for p in range(0,i):
             # K_A = 1
@@ -116,29 +138,36 @@ def smolsolve(x, xBound, f0, t, K_A, Nt):
 				kernBndry = np.log(xBound[i-p]/x[i-p-1])
 				kern = np.log(xBound[i-p+1:-1]/xBound[i-p:-2])
             elif K_A == 'x*y':
-				xA = x[i-p-1];
-				xB = xBound[i-p];
-				kernBndry = (xB - xA) * x[p];
-				xA = xBound[i-p:-2];
-				xB = xBound[i-p+1:-1];
-				kern      = (xB - xA) * x[p];
+				xA = x[i-p-1]
+				xB = xBound[i-p]
+				kernBndry = (xB - xA) * x[p]
+				xA = xBound[i-p:-2]
+				xB = xBound[i-p+1:-1]
+				kern      = (xB - xA) * x[p]
             elif K_A == '2+(x/y)^2+(y/x)^2':
-				xA = x[i-p-1];
-				xB = xBound[i-p];
-				kernBndry = (-xA**2 + xB**2 + x[p]**4 * (1./xA**2-1./xB**2)) / (2.*x[p]**2) + 2.*np.log(xB/xA);
-				xA = xBound[i-p:-2];
-				xB = xBound[i-p+1:-1];
-				kern      = (-xA**2 + xB**2 + x[p]**4 * (1./xA**2-1./xB**2)) / (2.*x[p]**2) + 2.*np.log(xB/xA);
+				xA = x[i-p-1]
+				xB = xBound[i-p]
+				kernBndry = (-xA**2 + xB**2 + x[p]**4 * (1./xA**2-1./xB**2)) / (2.*x[p]**2) + 2.*np.log(xB/xA)
+				xA = xBound[i-p:-2]
+				xB = xBound[i-p+1:-1]
+				kern      = (-xA**2 + xB**2 + x[p]**4 * (1./xA**2-1./xB**2)) / (2.*x[p]**2) + 2.*np.log(xB/xA)
             elif K_A == '(x*y)^(15/14)*(x+y)^(9/14)':  # https://arxiv.org/pdf/astro-ph/0201102.pdf
-				sys.exit("implement")
+				normConst = 0.01   # make physically meaningful!
+				xA = x[i-p-1]
+				xB = xBound[i-p]
+				kernBndry = normConst*-(7./120.) * x[p]**(15./14.) * (x[p] * (9. * x[p] * (xA/(xA+x[p])**5.)**(1./14.)+19. * (xA**15./(xA+x[p])**5.)**(1./14.)-9. * x[p] * (xB/(xB+x[p])**5.)**(1./14.)-19.*(xB**15./(xB+x[p])**5.)**(1./14.))+10.*((xA**29./(xA+x[p])**5.)**(1./14.)-(xB**29./(xB+x[p])**5.)**(1./14.))-9.*(xA * x[p]**23.)**(1./14.) * sps.hyp2f1(1./14.,5./14.,15./14.,-(xA/x[p]))+9.*(xB * x[p]**23.)**(1./14.)*sps.hyp2f1(1./14.,5./14.,15./14.,-(xB/x[p])))		
+				xA = xBound[i-p:-2]
+				xB = xBound[i-p+1:-1]
+				kern      = normConst*-(7./120.) * x[p]**(15./14.) * (x[p] * (9. * x[p] * (xA/(xA+x[p])**5.)**(1./14.)+19. * (xA**15./(xA+x[p])**5.)**(1./14.)-9. * x[p] * (xB/(xB+x[p])**5.)**(1./14.)-19.*(xB**15./(xB+x[p])**5.)**(1./14.))+10.*((xA**29./(xA+x[p])**5.)**(1./14.)-(xB**29./(xB+x[p])**5.)**(1./14.))-9.*(xA * x[p]**23.)**(1./14.) * sps.hyp2f1(1./14.,5./14.,15./14.,-(xA/x[p]))+9.*(xB * x[p]**23.)**(1./14.)*sps.hyp2f1(1./14.,5./14.,15./14.,-(xB/x[p])))
+
             else:
 				sys.exit("kernel incorrectly specified") 
             
-            JL[i] = JL[i] + dx*g[p] * (kernBndry*g[i-p-1] + np.sum(kern*g[i-p:-1]));
+            JL[i] = JL[i] + dx*g[p] * (kernBndry*g[i-p-1] + np.sum(kern*g[i-p:-1]))
     
-    JR = np.roll(JL,-1);
-    JR[-1]= 0;
-    g = g - dt / dx * ( JR - JL );
+    JR = np.roll(JL,-1)
+    JR[-1]= 0
+    g = g - dt / dx * ( JR - JL )
 
   f = g / x
   return f
